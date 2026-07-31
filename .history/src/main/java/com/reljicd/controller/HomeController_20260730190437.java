@@ -17,7 +17,6 @@ import java.util.Optional;
 public class HomeController {
 
     private static final int INITIAL_PAGE = 0;
-    private static final int PAGE_SIZE = 10;
 
     private final ProductService productService;
 
@@ -27,25 +26,21 @@ public class HomeController {
     }
 
     @GetMapping("/home")
-    public ModelAndView home(
-            @RequestParam(value = "page", required = false) Optional<Integer> page) {
+    public ModelAndView home(@RequestParam("page") Optional<Integer> page) {
 
-        int evalPage = (page.orElse(0) < 1)
-                ? INITIAL_PAGE
-                : page.get() - 1;
+        // Evaluate page. If requested parameter is null or less than 0 (to
+        // prevent exception), return initial size. Otherwise, return value of
+        // param. decreased by 1.
+        int evalPage = (page.orElse(0) < 1) ? INITIAL_PAGE : page.get() - 1;
 
-        Page<Product> products =
-                productService.findAllProductsPageable(
-                        PageRequest.of(evalPage, PAGE_SIZE)
-                );
-
+        Page<Product> products = productService.findAllProductsPageable (PageRequest.of(evalpage, size));
         Pager pager = new Pager(products);
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("products", products);
         modelAndView.addObject("pager", pager);
         modelAndView.setViewName("/home");
-
         return modelAndView;
     }
+
 }
